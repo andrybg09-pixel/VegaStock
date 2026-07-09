@@ -13,7 +13,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
 
     companion object {
         const val NOMBRE_BD = "vegastock.db"
-        const val VERSION_BD = 1
+        const val VERSION_BD = 2
 
         const val TABLA_USUARIOS = "usuarios"
         const val USUARIO_ID = "id"
@@ -35,6 +35,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         const val PRODUCTO_UNIDAD_MEDIDA = "unidad_medida"
         const val PRODUCTO_OBSERVACIONES = "observaciones"
         const val PRODUCTO_FECHA_CREACION = "fecha_creacion"
+
+        const val TABLA_MOVIMIENTOS = "movimientos"
+        const val MOVIMIENTO_ID = "id"
+        const val MOVIMIENTO_PRODUCTO_ID = "producto_id"
+        const val MOVIMIENTO_TIPO = "tipo"
+        const val MOVIMIENTO_CANTIDAD = "cantidad"
+        const val MOVIMIENTO_MOTIVO = "motivo"
+        const val MOVIMIENTO_STOCK_ANTERIOR = "stock_anterior"
+        const val MOVIMIENTO_STOCK_NUEVO = "stock_nuevo"
+        const val MOVIMIENTO_FECHA = "fecha"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -65,13 +75,36 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             )
         """.trimIndent()
 
+        val crearTablaMovimientos = """
+            CREATE TABLE $TABLA_MOVIMIENTOS (
+                $MOVIMIENTO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $MOVIMIENTO_PRODUCTO_ID INTEGER NOT NULL,
+                $MOVIMIENTO_TIPO TEXT NOT NULL,
+                $MOVIMIENTO_CANTIDAD INTEGER NOT NULL,
+                $MOVIMIENTO_MOTIVO TEXT NOT NULL,
+                $MOVIMIENTO_STOCK_ANTERIOR INTEGER NOT NULL,
+                $MOVIMIENTO_STOCK_NUEVO INTEGER NOT NULL,
+                $MOVIMIENTO_FECHA TEXT NOT NULL,
+                FOREIGN KEY ($MOVIMIENTO_PRODUCTO_ID)
+                    REFERENCES $TABLA_PRODUCTOS ($PRODUCTO_ID)
+                    ON DELETE CASCADE
+            )
+        """.trimIndent()
+
         db.execSQL(crearTablaUsuarios)
         db.execSQL(crearTablaProductos)
+        db.execSQL(crearTablaMovimientos)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, versionAnterior: Int, versionNueva: Int) {
+        db.execSQL("DROP TABLE IF EXISTS $TABLA_MOVIMIENTOS")
         db.execSQL("DROP TABLE IF EXISTS $TABLA_PRODUCTOS")
         db.execSQL("DROP TABLE IF EXISTS $TABLA_USUARIOS")
         onCreate(db)
+    }
+
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.setForeignKeyConstraintsEnabled(true)
     }
 }

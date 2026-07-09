@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.grupo5.vegastock.model.Producto
 import com.grupo5.vegastock.model.Usuario
 import com.grupo5.vegastock.seed.DataSeeder
 import com.grupo5.vegastock.ui.AgregarProductoScreen
@@ -46,7 +45,7 @@ fun VegaStockApp() {
 
     var pantallaActual by remember { mutableStateOf(Pantalla.LOGIN) }
     var usuarioActivo by remember { mutableStateOf<Usuario?>(null) }
-    var productoSeleccionado by remember { mutableStateOf<Producto?>(null) }
+    var productoIdSeleccionado by remember { mutableIntStateOf(0) }
     var contadorRecarga by remember { mutableIntStateOf(0) }
 
     BackHandler(enabled = pantallaActual != Pantalla.LOGIN && pantallaActual != Pantalla.PRODUCTOS) {
@@ -69,7 +68,7 @@ fun VegaStockApp() {
                 nombreUsuario = usuarioActivo?.nombreCompleto ?: "",
                 recargar = contadorRecarga,
                 onProductoClick = { producto ->
-                    productoSeleccionado = producto
+                    productoIdSeleccionado = producto.id
                     pantallaActual = Pantalla.DETALLE_PRODUCTO
                 },
                 onAgregarClick = {
@@ -91,14 +90,15 @@ fun VegaStockApp() {
         }
 
         Pantalla.DETALLE_PRODUCTO -> {
-            productoSeleccionado?.let { producto ->
-                DetalleProductoScreen(
-                    producto = producto,
-                    onVolver = {
-                        pantallaActual = Pantalla.PRODUCTOS
-                    }
-                )
-            }
+            DetalleProductoScreen(
+                productoId = productoIdSeleccionado,
+                onVolver = {
+                    pantallaActual = Pantalla.PRODUCTOS
+                },
+                onCambioStock = {
+                    contadorRecarga++
+                }
+            )
         }
     }
 }
