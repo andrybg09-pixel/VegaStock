@@ -10,9 +10,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.grupo5.vegastock.model.Producto
 import com.grupo5.vegastock.model.Usuario
 import com.grupo5.vegastock.seed.DataSeeder
 import com.grupo5.vegastock.ui.AgregarProductoScreen
+import com.grupo5.vegastock.ui.DetalleProductoScreen
 import com.grupo5.vegastock.ui.LoginScreen
 import com.grupo5.vegastock.ui.ProductosScreen
 import com.grupo5.vegastock.ui.theme.VegaStockTheme
@@ -35,7 +37,8 @@ class MainActivity : ComponentActivity() {
 private enum class Pantalla {
     LOGIN,
     PRODUCTOS,
-    AGREGAR_PRODUCTO
+    AGREGAR_PRODUCTO,
+    DETALLE_PRODUCTO
 }
 
 @Composable
@@ -43,9 +46,10 @@ fun VegaStockApp() {
 
     var pantallaActual by remember { mutableStateOf(Pantalla.LOGIN) }
     var usuarioActivo by remember { mutableStateOf<Usuario?>(null) }
+    var productoSeleccionado by remember { mutableStateOf<Producto?>(null) }
     var contadorRecarga by remember { mutableIntStateOf(0) }
 
-    BackHandler(enabled = pantallaActual == Pantalla.AGREGAR_PRODUCTO) {
+    BackHandler(enabled = pantallaActual != Pantalla.LOGIN && pantallaActual != Pantalla.PRODUCTOS) {
         pantallaActual = Pantalla.PRODUCTOS
     }
 
@@ -65,7 +69,8 @@ fun VegaStockApp() {
                 nombreUsuario = usuarioActivo?.nombreCompleto ?: "",
                 recargar = contadorRecarga,
                 onProductoClick = { producto ->
-                    // HU-10: aquí abriremos el detalle
+                    productoSeleccionado = producto
+                    pantallaActual = Pantalla.DETALLE_PRODUCTO
                 },
                 onAgregarClick = {
                     pantallaActual = Pantalla.AGREGAR_PRODUCTO
@@ -83,6 +88,17 @@ fun VegaStockApp() {
                     pantallaActual = Pantalla.PRODUCTOS
                 }
             )
+        }
+
+        Pantalla.DETALLE_PRODUCTO -> {
+            productoSeleccionado?.let { producto ->
+                DetalleProductoScreen(
+                    producto = producto,
+                    onVolver = {
+                        pantallaActual = Pantalla.PRODUCTOS
+                    }
+                )
+            }
         }
     }
 }
