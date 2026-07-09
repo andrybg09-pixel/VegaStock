@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
@@ -30,8 +31,10 @@ import com.grupo5.vegastock.ui.theme.*
 @Composable
 fun DetalleProductoScreen(
     productoId: Int,
+    recargar: Int,
     onVolver: () -> Unit,
-    onCambioStock: () -> Unit
+    onCambioStock: () -> Unit,
+    onEditarClick: () -> Unit
 ) {
     val context = LocalContext.current
     val productoRepo = remember { ProductoRepository(context) }
@@ -42,7 +45,7 @@ fun DetalleProductoScreen(
     var movimientos by remember { mutableStateOf<List<Movimiento>>(emptyList()) }
     var tipoDialogo by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(recargarLocal) {
+    LaunchedEffect(recargarLocal, recargar) {
         producto = productoRepo.obtenerPorId(productoId)
         movimientos = movimientoRepo.obtenerPorProducto(productoId)
     }
@@ -72,8 +75,12 @@ fun DetalleProductoScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VerdePrimario)
-            )
+                actions = {
+                    IconButton(onClick = onEditarClick) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = VerdePrimario))
         }
     ) { innerPadding ->
 

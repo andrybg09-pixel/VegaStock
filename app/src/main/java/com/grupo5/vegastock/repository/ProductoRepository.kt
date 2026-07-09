@@ -28,6 +28,30 @@ class ProductoRepository(context: Context) {
         return db.insert(DatabaseHelper.TABLA_PRODUCTOS, null, valores)
     }
 
+    fun actualizar(producto: Producto): Boolean {
+        val db = dbHelper.writableDatabase
+        val valores = ContentValues().apply {
+            put(DatabaseHelper.PRODUCTO_NOMBRE, producto.nombre)
+            put(DatabaseHelper.PRODUCTO_SKU, producto.sku)
+            put(DatabaseHelper.PRODUCTO_CATEGORIA, producto.categoria)
+            put(DatabaseHelper.PRODUCTO_PROVEEDOR, producto.proveedor)
+            put(DatabaseHelper.PRODUCTO_PRECIO_COMPRA, producto.precioCompra)
+            put(DatabaseHelper.PRODUCTO_PRECIO_VENTA, producto.precioVenta)
+            put(DatabaseHelper.PRODUCTO_STOCK_MINIMO, producto.stockMinimo)
+            put(DatabaseHelper.PRODUCTO_UNIDAD_MEDIDA, producto.unidadMedida)
+            put(DatabaseHelper.PRODUCTO_OBSERVACIONES, producto.observaciones)
+        }
+
+        val filasAfectadas = db.update(
+            DatabaseHelper.TABLA_PRODUCTOS,
+            valores,
+            "${DatabaseHelper.PRODUCTO_ID} = ?",
+            arrayOf(producto.id.toString())
+        )
+
+        return filasAfectadas == 1
+    }
+
     fun obtenerTodos(): List<Producto> {
         val lista = mutableListOf<Producto>()
         val db = dbHelper.readableDatabase

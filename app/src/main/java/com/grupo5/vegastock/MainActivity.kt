@@ -14,6 +14,7 @@ import com.grupo5.vegastock.model.Usuario
 import com.grupo5.vegastock.seed.DataSeeder
 import com.grupo5.vegastock.ui.AgregarProductoScreen
 import com.grupo5.vegastock.ui.DetalleProductoScreen
+import com.grupo5.vegastock.ui.EditarProductoScreen
 import com.grupo5.vegastock.ui.LoginScreen
 import com.grupo5.vegastock.ui.ProductosScreen
 import com.grupo5.vegastock.ui.theme.VegaStockTheme
@@ -37,7 +38,8 @@ private enum class Pantalla {
     LOGIN,
     PRODUCTOS,
     AGREGAR_PRODUCTO,
-    DETALLE_PRODUCTO
+    DETALLE_PRODUCTO,
+    EDITAR_PRODUCTO
 }
 
 @Composable
@@ -48,8 +50,12 @@ fun VegaStockApp() {
     var productoIdSeleccionado by remember { mutableIntStateOf(0) }
     var contadorRecarga by remember { mutableIntStateOf(0) }
 
-    BackHandler(enabled = pantallaActual != Pantalla.LOGIN && pantallaActual != Pantalla.PRODUCTOS) {
+    BackHandler(enabled = pantallaActual == Pantalla.AGREGAR_PRODUCTO || pantallaActual == Pantalla.DETALLE_PRODUCTO) {
         pantallaActual = Pantalla.PRODUCTOS
+    }
+
+    BackHandler(enabled = pantallaActual == Pantalla.EDITAR_PRODUCTO) {
+        pantallaActual = Pantalla.DETALLE_PRODUCTO
     }
 
     when (pantallaActual) {
@@ -92,11 +98,28 @@ fun VegaStockApp() {
         Pantalla.DETALLE_PRODUCTO -> {
             DetalleProductoScreen(
                 productoId = productoIdSeleccionado,
+                recargar = contadorRecarga,
                 onVolver = {
                     pantallaActual = Pantalla.PRODUCTOS
                 },
                 onCambioStock = {
                     contadorRecarga++
+                },
+                onEditarClick = {
+                    pantallaActual = Pantalla.EDITAR_PRODUCTO
+                }
+            )
+        }
+
+        Pantalla.EDITAR_PRODUCTO -> {
+            EditarProductoScreen(
+                productoId = productoIdSeleccionado,
+                onCancelar = {
+                    pantallaActual = Pantalla.DETALLE_PRODUCTO
+                },
+                onGuardado = {
+                    contadorRecarga++
+                    pantallaActual = Pantalla.DETALLE_PRODUCTO
                 }
             )
         }
